@@ -1,0 +1,15 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+SVC_df = read.csv("SVC.csv")
+SVC_df
+
+SVC_poly_df = read.csv("SVC_poly.csv")
+SVC_poly_df
+
+SVC_radial_df = read.csv("SVC_rad.csv")
+SVC_radial_df
+```

@@ -1,0 +1,192 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+SVC_df = read.csv("SVC.csv")
+SVC_df
+
+SVC_poly_df = read.csv("SVC_poly.csv")
+SVC_poly_df
+
+SVC_radial_df = read.csv("SVC_rad.csv")
+SVC_radial_df
+```
+
+
+```{r}
+library(dplyr)
+
+SVC_poly_mod = SVC_poly_df %>%
+  mutate(new_col = paste("Cost:", Cost, "Degree:", Degree)) %>%
+  arrange(desc(Accuracy))
+
+SVC_poly_mod$new_col = as.factor(SVC_poly_mod$new_col) 
+
+summary(SVC_poly_mod$new_col)
+
+SVC_poly_mod$new_col <- reorder(SVC_poly_mod$new_col, SVC_poly_mod$Accuracy)
+```
+
+```{r fig.width=14}
+
+ggplot(SVC_poly_mod, aes(x=new_col, y=Accuracy, group=1)) + 
+    geom_point(size=4, colour="#69b3a2") +
+    geom_line(colour="grey") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1)) +
+    xlab("Hyperparameters combination")
+
+```
+
+---
+# Radial
+
+```{r}
+
+SVC_radial_mod = SVC_radial_df %>%
+  mutate(new_col = paste("Cost:", Cost, "Gamma:", Gamma)) %>%
+  arrange(desc(Accuracy))
+
+SVC_radial_mod$new_col = as.factor(SVC_radial_mod$new_col) 
+
+
+# SVC_radial_mod$new_col <- reorder(SVC_radial_mod$new_col, SVC_radial_mod$Accuracy)
+```
+
+```{r fig.width=14}
+
+ggplot(SVC_radial_mod, aes(x=new_col, y=Accuracy, group=1)) + 
+    geom_point(size=4, colour="#69b3a2") +
+    geom_line(colour="grey") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1)) +
+    xlab("Hyperparameters combination")
+
+```
+ 
+ ---
+ # Linear SVC
+ 
+```{r fig.width=20}
+SVC_df_mod = SVC_df %>%
+  mutate(new_col = paste("Cost:", Cost)) %>%
+  arrange(desc(Accuracy))
+
+SVC_df_mod$new_col = as.factor(SVC_df_mod$new_col) 
+SVC_df_mod$Cost = format(SVC_df_mod$Cost, scientific = T)
+
+SVC_df_mod$Cost = as.factor(SVC_df_mod$Cost) 
+
+#SVC_df_mod$new_col <- reorder(SVC_df_mod$new_col, SVC_df_mod$Accuracy)
+
+ggplot(SVC_df_mod, aes(x=new_col, y=Accuracy, group=1, colour=Cost)) + 
+    geom_point() +
+    geom_line(colour="grey") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1)) +
+    xlab("Hyperparameters combination")
+
+```
+ 
+ ---
+ 
+```{r}
+library(dplyr)
+
+SVC_poly_mod = SVC_poly_df %>%
+  mutate(new_col = paste("Cost:", Cost, "Degree:", Degree)) %>%
+  arrange(desc(Accuracy))
+
+SVC_poly_mod$new_col = as.factor(SVC_poly_mod$new_col) 
+SVC_poly_mod$Cost = format(SVC_poly_mod$Cost, scientific = T)
+
+SVC_poly_mod$Cost = as.factor(SVC_poly_mod$Cost) 
+
+
+summary(SVC_poly_mod$new_col)
+
+#SVC_poly_mod$new_col <- reorder(SVC_poly_mod$new_col, SVC_poly_mod$Accuracy)
+```
+ 
+```{r fig.width=20}
+cols <- c("1e+03" = "#09006A", "1e+02" = "#261F7E", "1e+01" = "#443E92", "1e+00" = "#615DA6", "1e-01" = "#7E7DB9", "1e-02" = "#9B9CCD", "1e-03" = "#B9BBE1", "1e-04" = "#D6DAF5")
+
+ggplot(SVC_poly_mod, aes(x=new_col, y=Accuracy, size=Degree, colour=Cost, group=1)) + 
+    geom_point() +
+    scale_colour_manual(values = cols) +
+    guides(colour = guide_legend(override.aes = list(size=4))) +
+    scale_size(range = c(4, 9)) +
+    geom_line(colour="grey", size=1) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1, size=12)) +
+    xlab("Hyperparameters combination") +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    theme(axis.title.x = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    ggtitle("Polynomial kernel SVC hyperparameter search") +
+    theme(plot.title = element_text(hjust = 0.5, size= 18)) +
+    theme(plot.margin = margin(1,1,1.5,2, "cm"))
+
+ggsave("SVC_poly.png")
+```
+
+```{r fig.width=20}
+
+SVC_radial_mod = SVC_radial_df %>%
+  mutate(new_col = paste("Cost:", Cost, "Gamma:", Gamma)) %>%
+  arrange(desc(Accuracy))
+
+SVC_radial_mod$new_col = as.factor(SVC_radial_mod$new_col)
+SVC_radial_mod$Cost = format(SVC_radial_mod$Cost, scientific = T)
+SVC_radial_mod$Cost = as.factor(SVC_radial_mod$Cost) 
+# SVC_radial_mod$Gamma = as.factor(SVC_radial_mod$Gamma) 
+
+cols <- c("1e+03" = "#09006A", "1e+02" = "#261F7E", "1e+01" = "#443E92", "1e+00" = "#615DA6", "1e-01" = "#7E7DB9", "1e-02" = "#9B9CCD", "1e-03" = "#B9BBE1", "1e-04" = "#D6DAF5")
+
+ggplot(SVC_radial_mod, aes(x=new_col, y=Accuracy, size=Gamma, colour=Cost, group=1)) + 
+    geom_point() +
+    scale_colour_manual(values = cols) +
+    scale_size_continuous(range = c(4, 12),breaks=c(0.0001, 0.001, 0.01, 0.1, 1, 10)) +
+    guides(colour = guide_legend(override.aes = list(size=4))) +
+    # scale_size(range = c(4, 9)) +
+    geom_line(colour="grey", size=1) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1, size=12)) +
+    xlab("Hyperparameters combination") +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    theme(axis.title.x = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    ggtitle("Radial kernel SVC hyperparameter search") +
+    theme(plot.title = element_text(hjust = 0.5, size= 18)) +
+    theme(plot.margin = margin(1,1,1.5,2, "cm"))
+
+
+ggsave("SVC_rad.png")
+```
+
+
+```{r fig.width=20}
+
+SVC_mod = SVC_df %>%
+  mutate(new_col = paste("Cost:", Cost)) %>%
+  arrange(desc(Accuracy))
+
+SVC_mod$new_col = as.factor(SVC_mod$new_col)
+SVC_mod$Cost = format(SVC_mod$Cost, scientific = T)
+SVC_mod$Cost = as.factor(SVC_mod$Cost) 
+# SVC_radial_mod$Gamma = as.factor(SVC_radial_mod$Gamma) 
+
+cols <- c("1e+03" = "#09006A", "1e+02" = "#261F7E", "1e+01" = "#443E92", "1e+00" = "#615DA6", "1e-01" = "#7E7DB9", "1e-02" = "#9B9CCD", "1e-03" = "#B9BBE1", "1e-04" = "#D6DAF5")
+
+ggplot(SVC_mod, aes(x=new_col, y=Accuracy, colour=Cost, group=1)) + 
+    geom_point(size=5) +
+    scale_colour_manual(values = cols) +
+    guides(colour = guide_legend(override.aes = list(size=4))) +
+    # scale_size(range = c(4, 9)) +
+    geom_line(colour="grey", size=1) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1, size=12)) +
+    xlab("Hyperparameters combination") +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    theme(axis.title.x = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    ggtitle("Radial kernel SVC hyperparameter search") +
+    theme(plot.title = element_text(hjust = 0.5, size= 18)) +
+    theme(plot.margin = margin(1,1,1.5,2, "cm"))
+
+
+ggsave("SVC_linear.png")
+```
