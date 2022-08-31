@@ -3,13 +3,153 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+# Validation phase 
+## Models performances plots
+
+#### Libraries
+
 ```{r}
-SVC_df = read.csv("SVC.csv")
+# import dplyr
+library(dplyr)
+library(ggplot2)
+```
+
+### Open validation results CSV files (from 02_features_extraction_&_model_train_test.ipynb)
+
+```{r}
+# linear kernel SVC df
+SVC_df = read.csv("data/SVC.csv")
 SVC_df
 
-SVC_poly_df = read.csv("SVC_poly.csv")
+# polynomial kernel SVM df
+SVC_poly_df = read.csv("data/SVC_poly.csv")
 SVC_poly_df
 
-SVC_radial_df = read.csv("SVC_rad.csv")
+# radial kernel SVM df
+SVC_radial_df = read.csv("data/SVC_rad.csv")
 SVC_radial_df
 ```
+
+
+### Plot validation phase models performaces (hyperparameter tuning)
+
+### Linear kernel SVM
+```{r}
+SVC_mod = SVC_df %>%
+  # add a column with corresponding cost and degree values
+  mutate(new_col = paste("Cost:", Cost)) %>%
+  # sort df based on accuracy
+  arrange(desc(Accuracy))
+
+# convert the new column as factor
+SVC_mod$new_col = as.factor(SVC_mod$new_col)
+# avoid scientific notation in cost
+SVC_mod$Cost = format(SVC_mod$Cost, scientific = T)
+# convert cost as factor
+SVC_mod$Cost = as.factor(SVC_mod$Cost) 
+```
+
+Plot:
+
+```{r fig.width=20}
+cols <- c("1e+03" = "#09006A", "1e+02" = "#261F7E", "1e+01" = "#443E92", "1e+00" = "#615DA6", "1e-01" = "#7E7DB9", "1e-02" = "#9B9CCD", "1e-03" = "#B9BBE1", "1e-04" = "#D6DAF5")
+
+ggplot(SVC_mod, aes(x=new_col, y=F1.score, colour=Cost, group=1)) + 
+    geom_point(size=5) +
+    scale_colour_manual(values = cols) +
+    guides(colour = guide_legend(override.aes = list(size=4))) +
+    # scale_size(range = c(4, 9)) +
+    geom_line(colour="grey", size=1) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1, size=12)) +
+    xlab("Hyperparameters combination") +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    theme(axis.title.x = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    ggtitle("Radial kernel SVC hyperparameter search") +
+    theme(plot.title = element_text(hjust = 0.5, size= 18)) +
+    theme(plot.margin = margin(1,1,1.5,2, "cm"))
+
+
+ggsave("SVC_linear.png")
+```
+
+#### Polynomial kernel SVM
+
+```{r}
+
+SVC_poly_mod = SVC_poly_df %>%
+  # add a column with corresponding cost and degree values
+  mutate(new_col = paste("Cost:", Cost, "Degree:", Degree)) %>%
+  # sort df based on accuracy
+  arrange(desc(Accuracy))
+
+# convert the new column as factor
+SVC_poly_mod$new_col = as.factor(SVC_poly_mod$new_col) 
+# avoid scientific notation
+SVC_poly_mod$Cost = format(SVC_poly_mod$Cost, scientific = T)
+
+# convert cost as factor
+SVC_poly_mod$Cost = as.factor(SVC_poly_mod$Cost) 
+```
+
+Plot:
+
+```{r fig.width=20}
+# define cost color palette
+cols <- c("1e+03" = "#09006A", "1e+02" = "#261F7E", "1e+01" = "#443E92", "1e+00" = "#615DA6", "1e-01" = "#7E7DB9", "1e-02" = "#9B9CCD", "1e-03" = "#B9BBE1", "1e-04" = "#D6DAF5")
+
+ggplot(SVC_poly_mod, aes(x=new_col, y=F1.score, size=Degree, colour=Cost, group=1)) + 
+    geom_point() +
+    scale_colour_manual(values = cols) +
+    guides(colour = guide_legend(override.aes = list(size=4))) +
+    scale_size(range = c(4, 9)) +
+    geom_line(colour="grey", size=1) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1, size=12)) +
+    xlab("Hyperparameters combination") +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    theme(axis.title.x = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    ggtitle("Polynomial kernel SVC hyperparameter search") +
+    theme(plot.title = element_text(hjust = 0.5, size= 18)) +
+    theme(plot.margin = margin(1,1,1.5,2, "cm"))
+
+ggsave("SVC_poly.png")
+```
+
+#### Radial kernel SVM
+
+```{r}
+
+SVC_radial_mod = SVC_radial_df %>%
+  mutate(new_col = paste("Cost:", Cost, "Gamma:", Gamma)) %>%
+  arrange(desc(Accuracy))
+
+SVC_radial_mod$new_col = as.factor(SVC_radial_mod$new_col)
+SVC_radial_mod$Cost = format(SVC_radial_mod$Cost, scientific = T)
+SVC_radial_mod$Cost = as.factor(SVC_radial_mod$Cost)
+
+```
+
+
+```{r fig.width=20}
+
+cols <- c("1e+03" = "#09006A", "1e+02" = "#261F7E", "1e+01" = "#443E92", "1e+00" = "#615DA6", "1e-01" = "#7E7DB9", "1e-02" = "#9B9CCD", "1e-03" = "#B9BBE1", "1e-04" = "#D6DAF5")
+
+ggplot(SVC_radial_mod, aes(x=new_col, y=F1.score, size=Gamma, colour=Cost, group=1)) + 
+    geom_point() +
+    scale_colour_manual(values = cols) +
+    scale_size_continuous(range = c(4, 12),breaks=c(0.0001, 0.001, 0.01, 0.1, 1, 10)) +
+    guides(colour = guide_legend(override.aes = list(size=4))) +
+    # scale_size(range = c(4, 9)) +
+    geom_line(colour="grey", size=1) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1.1, size=12)) +
+    xlab("Hyperparameters combination") +
+    theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    theme(axis.title.x = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size= 15)) +
+    ggtitle("Radial kernel SVC hyperparameter search") +
+    theme(plot.title = element_text(hjust = 0.5, size= 18)) +
+    theme(plot.margin = margin(1,1,1.5,2, "cm"))
+
+
+ggsave("SVC_rad.png")
+```
+
+
