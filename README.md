@@ -1,2 +1,3 @@
-# NLP_exam_practical
+# NLP exam practical part
+
 Small project for Introduction to Machine Learning fot Natural Language Processing course
